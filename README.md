@@ -64,7 +64,7 @@
 | Переменная | Значение | Описание |
 |------------|----------|----------|
 | baseURL    | https://jsonplaceholder.typicode.com | Базовый URL для всех запросов |
-| postId     | 101      | ID поста, создаваемого в тесте |
+| postId     | 1      | ID поста, создаваемого в тесте |
 | userId     | 1        | ID пользователя |
 | postTitle  | Title at nam consequatur ea labore ea harum | Заголовок поста |
 | postBody   | Body cupiditate quo est a modi nesciunt soluut | Тело поста |
