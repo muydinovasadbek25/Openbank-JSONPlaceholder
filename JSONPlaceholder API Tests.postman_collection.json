@@ -1,0 +1,349 @@
+{
+	"info": {
+		"_postman_id": "3de7d47d-4759-4c1a-9cea-3068a983e970",
+		"name": "JSONPlaceholder API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22316276"
+	},
+	"item": [
+		{
+			"name": "Получение списка всех постов",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"const firstItem = responseJson[0];",
+							"",
+							"// Проверка статус на код 200",
+							"pm.test(\"Статус код 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Проверка, что тип контента ответа — application/json",
+							"pm.test(\"Тип контента application/json\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"// Проверка, что тело ответа является массивом",
+							"pm.test(\"Наличие массива в ответе\", function () {    ",
+							"    pm.expect(responseJson).to.be.an(\"array\");",
+							"});",
+							"",
+							"// Проверка, что массив не пустой (количество элементов больше 0)",
+							"pm.test(\"Количество элементов > 0\", function () {",
+							"    pm.expect(responseJson.length).to.be.above(0);",
+							"});",
+							"",
+							"// Проверка структуры первого элемента массива и наличия обязательных полей",
+							"pm.test(\"Структуру первого элемента (userId, id, title, body)\", function () {",
+							"    pm.expect(firstItem).to.have.property(\"userId\");",
+							"    pm.expect(firstItem).to.have.property(\"id\");",
+							"    pm.expect(firstItem).to.have.property(\"title\");",
+							"    pm.expect(firstItem).to.have.property(\"body\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/posts",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение поста по ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							" const responseJson = pm.response.json();",
+							" // Получаем userId из окружения",
+							"const expectedUserId = pm.environment.get(\"userId\");",
+							"",
+							"",
+							"// Проверка, что сервер вернул статус код 200",
+							"pm.test(\"Статус код 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Проверка, что ID поста равен 1",
+							"pm.test(\"ID поста равен 1\", function () {",
+							"    pm.expect(responseJson.id).to.eql(Number(expectedUserId));",
+							"});",
+							"",
+							"// Проверка наличия всех обязательных полей",
+							"pm.test(\"Наличие всех обязательных полей\", function () {",
+							"    pm.expect(responseJson).to.have.property(\"userId\");",
+							"    pm.expect(responseJson).to.have.property(\"id\");",
+							"    pm.expect(responseJson).to.have.property(\"title\");",
+							"    pm.expect(responseJson).to.have.property(\"body\");",
+							"});",
+							"",
+							"// Проверка типов данных полей",
+							"pm.test(\"Типы данных полей\", function () {",
+							"    pm.expect(responseJson.userId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.id).to.be.a(\"number\");",
+							"    pm.expect(responseJson.title).to.be.a(\"string\");",
+							"    pm.expect(responseJson.body).to.be.a(\"string\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/posts/{{postId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts",
+						"{{postId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cоздание нового поста",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"const expectedUserId = Number(pm.environment.get(\"userId\"));",
+							"",
+							"// Сохраняем id в переменной окружения",
+							"pm.environment.set(\"postIdNew\", responseJson.id);",
+							"",
+							"// Проверка статус кодa 201 (ресурс создан)",
+							"pm.test(\"Статус код 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"// Проверка, что созданный пост содержит отправленные данные",
+							"pm.test(\"Созданный пост содержит отправленные данные\", function () {",
+							"    pm.expect(responseJson.userId).to.eql(Number(expectedUserId));",
+							"    pm.expect(responseJson.title).to.eql(\"Title at nam consequatur ea labore ea harum\");",
+							"    pm.expect(responseJson.body).to.eql(\"Body cupiditate quo est a modi nesciunt soluut\");",
+							"});",
+							"",
+							"// Проверка наличия сгенерированного ID",
+							"pm.test(\"Наличие сгенерированного ID\", function () {",
+							"    pm.expect(responseJson).to.have.property(\"id\");",
+							"    pm.expect(responseJson.id).to.be.a(\"number\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": {{userId}},\n    \"title\": \"Title at nam consequatur ea labore ea harum\",\n    \"body\": \"Body cupiditate quo est a modi nesciunt soluut\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/posts",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Обновление поста",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();",
+							"// Получаем postId из окружения",
+							"const expectedPostId = pm.environment.get(\"postId\");",
+							"// Получаем userId из окружения",
+							"const expectedUserId = pm.environment.get(\"userId\");",
+							"",
+							"// Проверка, что сервер вернул статус код 200",
+							"pm.test(\"Статус код 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Проверка, что данные поста обновлены и совпадают с отправленными",
+							"pm.test(\"Обновленные данные в ответе\", function () {",
+							"    pm.expect(response.userId).to.eql(Number(expectedUserId));",
+							"    pm.expect(response.id).to.eql(Number(expectedPostId));",
+							"    pm.expect(response.title).to.eql(\"Updated Title\");",
+							"    pm.expect(response.body).to.eql(\"Updated Body\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"dynamicTitle\", \"Updated Title\");",
+							"pm.environment.set(\"dynamicBody\", \"Updated Body\");"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": {{userId}},\n    \"title\": \"{{dynamicTitle}}\",\n    \"body\": \"{{dynamicBody}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/posts/{{postId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts",
+						"{{postId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение комментариев к посту",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"// Получаем postId из окружения",
+							"const expectedPostId = pm.environment.get(\"postId\");",
+							"",
+							"// Проверка, что сервер вернул статус код 200",
+							"pm.test(\"Статус код 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Проверка, что все комментарии относятся к postId = 1",
+							"pm.test(\"Все комментарии относятся к postId = 1\", function () {",
+							"    responseJson.forEach(comment => {",
+							"        pm.expect(comment.postId).to.eql(Number(expectedPostId));",
+							"    });",
+							"});",
+							"",
+							"// Проверка структуры каждого комментария",
+							"pm.test(\"Структуру комментария (postId, id, name, email, body)\", function () {",
+							"    responseJson.forEach(comment => {",
+							"        pm.expect(comment).to.have.property(\"postId\");",
+							"        pm.expect(comment).to.have.property(\"id\");",
+							"        pm.expect(comment).to.have.property(\"name\");",
+							"        pm.expect(comment).to.have.property(\"email\");",
+							"        pm.expect(comment).to.have.property(\"body\");",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/posts/1/comments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts",
+						"1",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
